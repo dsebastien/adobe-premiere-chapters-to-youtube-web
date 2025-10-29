@@ -90,6 +90,7 @@ This project includes a complete CI/CD pipeline using GitHub Actions that automa
 1. **Enable GitHub Pages** in your repository:
    - Go to **Settings** > **Pages**
    - Under **Source**, select **GitHub Actions**
+   - **(Optional)** Configure a custom domain in the **Custom domain** field
 
 2. **Push to main branch**:
 
@@ -103,7 +104,8 @@ This project includes a complete CI/CD pipeline using GitHub Actions that automa
    - Go to the **Actions** tab in your repository
    - Watch the workflow run
    - Once complete, your site will be live at:
-     `https://yourusername.github.io/adobe-premiere-chapters-to-youtube-web/`
+     - Custom domain (if configured): `https://your-custom-domain.com/`
+     - GitHub Pages: `https://yourusername.github.io/adobe-premiere-chapters-to-youtube-web/` (only works with custom domain configured)
 
 The GitHub Actions workflow runs on every push and pull request to `main`, but only deploys when pushing to `main`.
 
