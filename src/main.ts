@@ -1,3 +1,4 @@
+import './styles.css';
 import { parseMarkerFile } from '@/core/parser';
 import { convertToYouTubeFormat, formatChaptersAsText } from '@/core/converter';
 import { validateYouTubeChapters } from '@/core/validator';
