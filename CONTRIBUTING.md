@@ -29,17 +29,20 @@ We welcome contributions of all kinds:
 ### Setup
 
 1. **Fork and clone the repository**:
+
    ```bash
    git clone https://github.com/yourusername/adobe-premiere-chapters-to-youtube-gui.git
    cd adobe-premiere-chapters-to-youtube-gui
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 3. **Start development environment** (IMPORTANT - run all three):
+
    ```bash
    # In separate terminals or as background processes
    npm run dev         # Development server at http://localhost:3000
@@ -92,6 +95,7 @@ src/
 ```
 
 **Module Guidelines**:
+
 - `src/core/`: Pure functions only, no side effects, fully tested
 - `src/utils/`: Browser API wrappers, error-safe
 - `src/main.ts`: DOM manipulation and event handling
@@ -100,11 +104,13 @@ src/
 ### Writing Tests
 
 Tests are **required** for:
+
 - ✅ All new features in `src/core/` or `src/utils/`
 - ✅ All bug fixes (add regression test)
 - ✅ Any refactoring of core logic
 
 Example test structure:
+
 ```typescript
 import { describe, it, expect } from 'vitest';
 import { functionToTest } from '../module';
@@ -123,6 +129,7 @@ describe('functionToTest', () => {
 ```
 
 Run tests:
+
 ```bash
 npm run test          # Run once
 npm run test:watch    # Watch mode (recommended during development)
@@ -134,6 +141,7 @@ npm run test:coverage # With coverage report
 
 1. **Keep commits focused**: One logical change per commit
 2. **Write clear commit messages**:
+
    ```
    Add validation for minimum chapter length
 
@@ -141,12 +149,14 @@ npm run test:coverage # With coverage report
    - Add warning message for short chapters
    - Add tests for new validation logic
    ```
+
 3. **Test before committing**: All tests must pass
 4. **Format before committing**: Run `npm run format`
 
 ### Pull Request Process
 
 1. **Create a feature branch**:
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -157,6 +167,7 @@ npm run test:coverage # With coverage report
    - Update documentation if needed
 
 3. **Verify everything passes**:
+
    ```bash
    npm run test
    npm run lint
@@ -186,11 +197,13 @@ npm run test:coverage # With coverage report
 ### Feature Requests
 
 Before implementing a new feature:
+
 1. Open an issue to discuss the feature
 2. Wait for approval from maintainers
 3. Ensure it aligns with project goals
 
 **Project Goals**:
+
 - ✅ Privacy-first (client-side only)
 - ✅ Zero runtime dependencies (use native Web APIs)
 - ✅ Minimal bundle size

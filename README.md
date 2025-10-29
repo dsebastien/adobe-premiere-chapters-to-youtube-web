@@ -94,20 +94,24 @@ The production-ready files will be in the `dist/` directory.
 ## Troubleshooting
 
 **Chapters not appearing on YouTube:**
+
 - Verify your first chapter starts at 00:00:00
 - Ensure you have at least 3 chapters
 - Check that chapters are at least 10 seconds apart
 - Confirm timestamps are in ascending order
 
 **"Clipboard not available" error:**
+
 - Ensure you're using HTTPS or localhost
 - Try the download button instead
 
 **Encoding errors when reading the file:**
+
 - Ensure the file was exported directly from Adobe Premiere Pro
 - Do not open/save the file in text editors that might change the encoding
 
 **File not recognized:**
+
 - Verify the file has a `.txt`, `.tsv`, or `.csv` extension
 - Ensure the file contains the standard Premiere marker export format
 
@@ -116,6 +120,7 @@ The production-ready files will be in the `dist/` directory.
 We welcome contributions! Whether you're fixing bugs, adding features, or improving documentation, your help is appreciated.
 
 **👉 Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines on:**
+
 - Setting up your development environment
 - Code standards and TypeScript requirements
 - Testing requirements (all features need tests!)
