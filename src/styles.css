@@ -1,0 +1,29 @@
+@import 'tailwindcss';
+
+/* Custom theme configuration */
+@theme {
+  --color-premiere: #00005b;
+  --color-youtube: #ff0000;
+}
+
+/* Base styles */
+@layer base {
+  body {
+    font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Custom utilities */
+@layer utilities {
+  .drag-over {
+    border-color: var(--color-premiere);
+    background-color: rgb(239 246 255);
+
+    @media (prefers-color-scheme: dark) {
+      border-color: rgb(59 130 246);
+      background-color: rgb(30 58 138 / 0.2);
+    }
+  }
+}

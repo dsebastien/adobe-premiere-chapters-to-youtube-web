@@ -2,22 +2,29 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
+  root: 'src',
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
     },
   },
+  publicDir: resolve(__dirname, 'public'),
   build: {
-    outDir: 'dist',
+    outDir: resolve(__dirname, 'dist'),
+    emptyOutDir: true,
     sourcemap: true,
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
+        main: resolve(__dirname, 'src/index.html'),
       },
     },
   },
   server: {
     port: 3000,
     open: true,
+    fs: {
+      // Allow serving files from dist during development
+      allow: ['..'],
+    },
   },
 });
