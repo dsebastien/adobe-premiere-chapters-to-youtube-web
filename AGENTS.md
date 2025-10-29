@@ -499,9 +499,10 @@ This project uses **Tailwind CSS v4** exclusively for all styling.
    }
    ```
 
-4. **Vite CSS Processing**: CSS is imported in `src/main.ts` and processed by Vite automatically
+4. **Tailwind Vite Plugin**: Uses `@tailwindcss/vite` plugin for seamless integration
+   - Plugin configured in `vite.config.ts`: `plugins: [tailwindcss()]`
    - `import './styles.css'` in main.ts loads Tailwind v4
-   - Vite processes CSS during both dev and build
+   - Vite plugin processes CSS during both dev and build
    - Changes to styles.css trigger hot module reload automatically
 
 #### ❌ Forbidden Practices
@@ -514,13 +515,15 @@ This project uses **Tailwind CSS v4** exclusively for all styling.
 
 #### Tailwind v4 Specific
 
-This project uses Tailwind CSS v4 integrated with Vite:
+This project uses Tailwind CSS v4 with the official Vite plugin:
 
+- **Package**: `@tailwindcss/vite` - Official Vite plugin for Tailwind v4
+- **Plugin**: Configured in `vite.config.ts` with `tailwindcss()` plugin
 - **Source**: `src/styles.css` (with `@import "tailwindcss"`)
 - **Import**: CSS is imported in `src/main.ts` with `import './styles.css'`
 - **Output**: Bundled into `dist/assets/*.css` by Vite with content hash
-- **No config files**: Theme is in CSS using `@theme`
-- **No PostCSS**: Tailwind CLI handles everything
+- **No config files**: Theme is in CSS using `@theme` blocks
+- **No PostCSS config**: The Vite plugin handles everything automatically
 
 ---
 
