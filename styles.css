@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom utilities and overrides */
+@layer base {
+  body {
+    @apply antialiased;
+  }
+}
+
+@layer utilities {
+  .drag-over {
+    @apply border-premiere bg-blue-50 dark:border-blue-500 dark:bg-blue-900/20;
+  }
+}

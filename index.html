@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Convert Adobe Premiere Pro chapter markers to YouTube chapter format instantly in your browser"
+    />
+    <title>Adobe Premiere Chapters to YouTube</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="bg-gray-50 dark:bg-gray-900">
+    <div class="mx-auto min-h-screen max-w-4xl px-4 py-8">
+      <!-- Header -->
+      <header class="mb-8 text-center">
+        <h1 class="mb-2 text-4xl font-bold text-gray-900 dark:text-white">
+          Premiere to YouTube Chapters
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400">
+          Convert Adobe Premiere Pro chapter markers to YouTube format
+        </p>
+      </header>
+
+      <!-- Upload Area -->
+      <section class="mb-8">
+        <div
+          id="dropzone"
+          class="rounded-lg border-2 border-dashed border-gray-300 bg-white p-8 text-center transition-colors hover:border-premiere dark:border-gray-700 dark:bg-gray-800"
+        >
+          <div id="upload-content">
+            <svg
+              class="mx-auto mb-4 h-12 w-12 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+              />
+            </svg>
+            <p
+              class="mb-2 text-lg font-medium text-gray-700 dark:text-gray-300"
+            >
+              Drop your Premiere marker file here
+            </p>
+            <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+              or click to browse
+            </p>
+            <input
+              type="file"
+              id="file-input"
+              accept=".txt,.tsv,.csv"
+              class="hidden"
+            />
+            <button
+              id="browse-button"
+              class="rounded-lg bg-premiere px-6 py-2 font-medium text-white transition-colors hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-premiere focus:ring-offset-2 dark:bg-blue-600 dark:hover:bg-blue-700"
+            >
+              Browse Files
+            </button>
+          </div>
+
+          <!-- Loading State -->
+          <div id="loading-state" class="hidden">
+            <div
+              class="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-premiere"
+            ></div>
+            <p class="mt-4 text-gray-600 dark:text-gray-400">Processing...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Error Display -->
+      <div
+        id="error-container"
+        class="mb-6 hidden rounded-lg border border-red-300 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/30"
+      >
+        <h3 class="mb-2 font-semibold text-red-800 dark:text-red-300">Error</h3>
+        <p id="error-message" class="text-red-700 dark:text-red-400"></p>
+      </div>
+
+      <!-- Validation Warnings -->
+      <div
+        id="warning-container"
+        class="mb-6 hidden rounded-lg border border-yellow-300 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900/30"
+      >
+        <h3 class="mb-2 font-semibold text-yellow-800 dark:text-yellow-300">
+          Warnings
+        </h3>
+        <ul
+          id="warning-list"
+          class="list-inside list-disc text-yellow-700 dark:text-yellow-400"
+        ></ul>
+      </div>
+
+      <!-- Preview Section -->
+      <section id="preview-section" class="mb-8 hidden">
+        <div
+          class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+        >
+          <h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
+            YouTube Chapters
+          </h2>
+          <pre
+            id="preview-output"
+            class="rounded bg-gray-50 p-4 font-mono text-sm text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+          ></pre>
+
+          <!-- Action Buttons -->
+          <div class="mt-6 flex flex-wrap gap-3">
+            <button
+              id="copy-button"
+              class="flex items-center gap-2 rounded-lg bg-youtube px-6 py-2 font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-youtube focus:ring-offset-2 dark:bg-red-600 dark:hover:bg-red-700"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
+              </svg>
+              Copy to Clipboard
+            </button>
+
+            <button
+              id="download-button"
+              class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+              Download File
+            </button>
+
+            <button
+              id="reset-button"
+              class="ml-auto text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              Process Another File
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Info Section -->
+      <section
+        class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+      >
+        <h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
+          YouTube Chapter Requirements
+        </h2>
+        <ul class="space-y-2 text-gray-700 dark:text-gray-300">
+          <li class="flex items-start gap-2">
+            <svg
+              class="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span>First chapter must start at <strong>00:00:00</strong></span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg
+              class="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span>Minimum of <strong>3 chapters</strong> required</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg
+              class="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span
+              >Each chapter must be at least
+              <strong>10 seconds</strong> long</span
+            >
+          </li>
+          <li class="flex items-start gap-2">
+            <svg
+              class="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span>Timestamps must be in <strong>ascending order</strong></span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Footer -->
+      <footer class="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+        <p>
+          All processing happens in your browser. No files are uploaded to any
+          server.
+        </p>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
