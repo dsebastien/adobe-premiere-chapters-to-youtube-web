@@ -1,18 +1,26 @@
 import type { YouTubeChapter, ValidationResult } from '@/types';
 
 /**
- * Converts timestamp string (HH:MM:SS) to total seconds
+ * Converts timestamp string to total seconds
+ * Supports both MM:SS and HH:MM:SS formats
  *
- * @param timestamp - Time in format HH:MM:SS
+ * @param timestamp - Time in format MM:SS or HH:MM:SS
  * @returns Total seconds
  */
 function timestampToSeconds(timestamp: string): number {
   const parts = timestamp.split(':').map((part) => parseInt(part, 10));
-  if (parts.length !== 3) {
-    return 0;
+
+  if (parts.length === 2) {
+    // MM:SS format
+    const [minutes, seconds] = parts;
+    return (minutes || 0) * 60 + (seconds || 0);
+  } else if (parts.length === 3) {
+    // HH:MM:SS format
+    const [hours, minutes, seconds] = parts;
+    return (hours || 0) * 3600 + (minutes || 0) * 60 + (seconds || 0);
   }
-  const [hours, minutes, seconds] = parts;
-  return (hours || 0) * 3600 + (minutes || 0) * 60 + (seconds || 0);
+
+  return 0;
 }
 
 /**
@@ -43,11 +51,12 @@ export function validateYouTubeChapters(
     );
   }
 
-  // Check first chapter starts at 00:00:00
+  // Check first chapter starts at 00:00 or 00:00:00
   const firstTimestamp = chapters[0]?.timestamp;
-  if (firstTimestamp !== '00:00:00') {
+  const firstSeconds = timestampToSeconds(firstTimestamp || '');
+  if (firstSeconds !== 0) {
     errors.push(
-      `First chapter must start at 00:00:00. Your first chapter starts at ${firstTimestamp}.`
+      `First chapter must start at 00:00. Your first chapter starts at ${firstTimestamp}.`
     );
   }
 

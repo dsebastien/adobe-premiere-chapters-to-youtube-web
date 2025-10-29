@@ -42,7 +42,7 @@ describe('validateYouTubeChapters', () => {
 
     expect(result.valid).toBe(false);
     expect(result.errors).toContain(
-      'First chapter must start at 00:00:00. Your first chapter starts at 00:00:10.'
+      'First chapter must start at 00:00. Your first chapter starts at 00:00:10.'
     );
   });
 

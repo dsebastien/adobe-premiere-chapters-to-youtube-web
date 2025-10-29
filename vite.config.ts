@@ -4,6 +4,9 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [tailwindcss()],
+  base: process.env.GITHUB_ACTIONS
+    ? '/adobe-premiere-chapters-to-youtube-web/'
+    : '/',
   root: 'src',
   resolve: {
     alias: {

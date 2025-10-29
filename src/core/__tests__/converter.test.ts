@@ -15,15 +15,15 @@ describe('convertToYouTubeFormat', () => {
     expect(result).toHaveLength(3);
     expect(result[0]).toEqual({
       name: 'Introduction',
-      timestamp: '00:00:00',
+      timestamp: '00:00',
     });
     expect(result[1]).toEqual({
       name: 'Main Content',
-      timestamp: '00:01:30',
+      timestamp: '01:30',
     });
     expect(result[2]).toEqual({
       name: 'Conclusion',
-      timestamp: '00:05:45',
+      timestamp: '05:45',
     });
   });
 
@@ -35,7 +35,7 @@ describe('convertToYouTubeFormat', () => {
 
     const result = convertToYouTubeFormat(markers);
 
-    expect(result[0]?.timestamp).toBe('00:00:00');
+    expect(result[0]?.timestamp).toBe('00:00');
     expect(result[1]?.timestamp).toBe('01:23:45');
   });
 
@@ -64,31 +64,31 @@ describe('convertToYouTubeFormat', () => {
 
     const result = convertToYouTubeFormat(markers);
 
-    expect(result[0]?.timestamp).toBe('00:00:00');
+    expect(result[0]?.timestamp).toBe('00:00');
   });
 });
 
 describe('formatChaptersAsText', () => {
   it('should format chapters as YouTube description text', () => {
     const chapters = [
-      { name: 'Introduction', timestamp: '00:00:00' },
-      { name: 'Main Content', timestamp: '00:01:30' },
-      { name: 'Conclusion', timestamp: '00:05:45' },
+      { name: 'Introduction', timestamp: '00:00' },
+      { name: 'Main Content', timestamp: '01:30' },
+      { name: 'Conclusion', timestamp: '05:45' },
     ];
 
     const result = formatChaptersAsText(chapters);
 
     expect(result).toBe(
-      'Introduction 00:00:00\nMain Content 00:01:30\nConclusion 00:05:45'
+      '00:00 Introduction\n01:30 Main Content\n05:45 Conclusion'
     );
   });
 
   it('should handle single chapter', () => {
-    const chapters = [{ name: 'Only Chapter', timestamp: '00:00:00' }];
+    const chapters = [{ name: 'Only Chapter', timestamp: '00:00' }];
 
     const result = formatChaptersAsText(chapters);
 
-    expect(result).toBe('Only Chapter 00:00:00');
+    expect(result).toBe('00:00 Only Chapter');
   });
 
   it('should handle empty array', () => {
@@ -101,11 +101,11 @@ describe('formatChaptersAsText', () => {
 
   it('should preserve chapter name formatting', () => {
     const chapters = [
-      { name: 'Chapter: Special (Part 1)', timestamp: '00:00:00' },
+      { name: 'Chapter: Special (Part 1)', timestamp: '00:00' },
     ];
 
     const result = formatChaptersAsText(chapters);
 
-    expect(result).toBe('Chapter: Special (Part 1) 00:00:00');
+    expect(result).toBe('00:00 Chapter: Special (Part 1)');
   });
 });

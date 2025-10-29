@@ -75,15 +75,48 @@ Adobe Premiere Pro exports marker files in UTF-16 Little Endian encoding by defa
 
 ## Deployment
 
+### Automatic Deployment with GitHub Actions
+
+This project includes a complete CI/CD pipeline using GitHub Actions that automatically:
+
+- ✅ **Checks code formatting** (Prettier)
+- ✅ **Runs linting** (TypeScript + Prettier)
+- ✅ **Executes all tests** (Vitest)
+- ✅ **Builds the production bundle**
+- ✅ **Deploys to GitHub Pages** (on push to `main`)
+
+**Setup Instructions:**
+
+1. **Enable GitHub Pages** in your repository:
+   - Go to **Settings** > **Pages**
+   - Under **Source**, select **GitHub Actions**
+
+2. **Push to main branch**:
+
+   ```bash
+   git add .
+   git commit -m "Deploy with GitHub Actions"
+   git push origin main
+   ```
+
+3. **Monitor deployment**:
+   - Go to the **Actions** tab in your repository
+   - Watch the workflow run
+   - Once complete, your site will be live at:
+     `https://yourusername.github.io/adobe-premiere-chapters-to-youtube-web/`
+
+The GitHub Actions workflow runs on every push and pull request to `main`, but only deploys when pushing to `main`.
+
+### Manual Deployment
+
 The application is a static site and can be deployed to any static hosting service:
 
-- **GitHub Pages**: Ideal for personal projects
 - **Netlify**: Automatic deployments from Git
 - **Vercel**: Zero-configuration deployment
 - **Cloudflare Pages**: Fast global CDN
 - **Any Static Host**: Just upload the `dist/` folder
 
-### Build Command
+#### Build Command
 
 ```bash
 npm run build
