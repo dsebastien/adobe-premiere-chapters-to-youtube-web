@@ -45,7 +45,7 @@ We welcome contributions of all kinds:
 
    ```bash
    # In separate terminals or as background processes
-   npm run dev         # Development server at http://localhost:3000
+   npm run dev         # Development server at http://localhost:4200
    npm run tsc:watch   # TypeScript type checking
    npm run test:watch  # Continuous test runner
    ```

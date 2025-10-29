@@ -241,7 +241,7 @@ These processes should:
 2. **While Developing:**
    - Monitor output from all background processes for errors
    - Check test:watch output for failing tests
-   - Test changes in the browser at http://localhost:3000
+   - Test changes in the browser at http://localhost:4200
    - Check tsc:watch output for type errors after each significant change
    - Make iterative improvements based on instant feedback
 
@@ -719,7 +719,7 @@ npm run build
 5. **Implement with strict TypeScript**:
    - Write code and watch tsc:watch output for immediate type errors
    - Watch test:watch to see tests pass as you implement
-   - Test in browser at http://localhost:3000 via dev server
+   - Test in browser at http://localhost:4200 via dev server
    - Iterate based on instant feedback from all watchers
 
 6. **Add JSDoc comments**
@@ -747,7 +747,7 @@ npm run build
    npm run test:watch  # Background - Test runner
    ```
 
-2. **Reproduce the bug** in browser at http://localhost:3000
+2. **Reproduce the bug** in browser at http://localhost:4200
 
 3. **Identify the source** (core logic vs. UI vs. utils)
 
@@ -824,7 +824,7 @@ npm run build
    npm run test:watch  # Background - Test runner
    ```
 
-4. **Test the app** in browser at http://localhost:3000
+4. **Test the app** in browser at http://localhost:4200
 
 5. **Verify all watchers show success**:
    - tsc:watch shows no new errors

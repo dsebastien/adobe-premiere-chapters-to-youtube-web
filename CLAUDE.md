@@ -35,7 +35,7 @@ Keep these running throughout your entire session for instant feedback on all ch
 npm install
 
 # 2. Start background processes (REQUIRED for all development)
-npm run dev         # Background - starts at http://localhost:3000
+npm run dev         # Background - starts at http://localhost:4200
 npm run tsc:watch   # Background - watch for type errors
 npm run test:watch  # Background - run tests automatically
 

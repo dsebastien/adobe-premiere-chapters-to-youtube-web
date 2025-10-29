@@ -20,7 +20,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: 4200,
     open: true,
     fs: {
       // Allow serving files from dist during development
