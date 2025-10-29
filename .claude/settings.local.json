@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm run build:css:*)",
       "Bash(npx prettier:*)",
-      "Bash(npm run dev:css:*)"
+      "Bash(npm run dev:css:*)",
+      "Bash(npm run format:check:*)"
     ],
     "deny": [],
     "ask": []
