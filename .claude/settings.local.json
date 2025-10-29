@@ -1,14 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build:*)",
-      "Bash(npm run format:*)",
-      "Bash(tree:*)",
-      "Bash(npm install:*)",
-      "Bash(npm run test:*)",
-      "Bash(npm run dev:*)",
-      "Bash(npm run tsc:watch:*)",
-      "Bash(npm run test:watch:*)"
+      "Bash(npm run build:css:*)",
+      "Bash(npx prettier:*)",
+      "Bash(npm run dev:css:*)"
     ],
     "deny": [],
     "ask": []
