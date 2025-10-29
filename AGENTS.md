@@ -35,6 +35,9 @@ This is a **web application** that converts Adobe Premiere Pro chapter markers t
 ```
 /
 ├── src/
+│   ├── index.html         # Main HTML file (entry point)
+│   ├── styles.css         # Tailwind CSS v4 source
+│   ├── main.ts            # Application entry point (DOM manipulation)
 │   ├── core/              # Core business logic (pure functions)
 │   │   ├── parser.ts      # Parse Premiere marker files
 │   │   ├── converter.ts   # Convert to YouTube format
@@ -42,13 +45,14 @@ This is a **web application** that converts Adobe Premiere Pro chapter markers t
 │   ├── utils/             # Utility functions
 │   │   ├── fileReader.ts  # UTF-16LE file reading
 │   │   └── clipboard.ts   # Clipboard operations
-│   ├── types/             # TypeScript type definitions
-│   │   └── index.ts       # All interfaces and types
-│   └── main.ts            # Application entry point (DOM manipulation)
+│   └── types/             # TypeScript type definitions
+│       └── index.ts       # All interfaces and types
+├── dist/                  # Build output (generated, gitignored)
+│   ├── styles.css         # Generated Tailwind CSS
+│   ├── index.html         # Processed HTML
+│   └── assets/            # Bundled JS/CSS with hashes
 ├── public/                # Static assets
-├── index.html             # Main HTML file
-├── styles.css             # Tailwind CSS entry
-└── [config files]         # Vite, TypeScript, Tailwind, etc.
+└── [config files]         # Vite, TypeScript, etc.
 ```
 
 ### Module Responsibilities
@@ -75,6 +79,7 @@ This is a **web application** that converts Adobe Premiere Pro chapter markers t
   - Returns detailed `ValidationResult` with errors and warnings
 
 **Rules for Core Module:**
+
 - ✅ Pure functions only (no side effects)
 - ✅ All functions must have JSDoc comments
 - ✅ Must handle edge cases (empty input, malformed data)
@@ -97,6 +102,7 @@ This is a **web application** that converts Adobe Premiere Pro chapter markers t
   - Must handle permission errors
 
 **Rules for Utils Module:**
+
 - ✅ Wrap native APIs in error-safe functions
 - ✅ Return Promises for async operations
 - ✅ Provide clear error messages
@@ -107,11 +113,13 @@ This is a **web application** that converts Adobe Premiere Pro chapter markers t
 **Purpose**: Central type definitions for the entire application.
 
 **All types must be:**
+
 - Exported as interfaces (not types)
 - Documented with JSDoc comments
 - As specific as possible (avoid `any` or `unknown`)
 
 **Key Types:**
+
 - `Marker`: Adobe Premiere marker data
 - `YouTubeChapter`: YouTube-formatted chapter
 - `ValidationResult`: Validation outcome with errors/warnings
@@ -122,6 +130,7 @@ This is a **web application** that converts Adobe Premiere Pro chapter markers t
 **Purpose**: Application entry point with DOM manipulation and event handling.
 
 **Responsibilities:**
+
 - Initialize application state
 - Wire up event listeners
 - Handle user interactions
@@ -129,6 +138,7 @@ This is a **web application** that converts Adobe Premiere Pro chapter markers t
 - Orchestrate core/utils modules
 
 **Rules for Main Module:**
+
 - ✅ All DOM queries happen once at initialization
 - ✅ Store references in `elements` object
 - ✅ Use type assertions for DOM elements (`as HTMLInputElement`)
@@ -169,6 +179,9 @@ npm run type-check
 # Type checking with watch mode
 npm run tsc:watch
 
+# Tailwind CSS watch mode (generates CSS from src/styles.css)
+npm run dev:css
+
 # Code formatting (auto-fix)
 npm run format
 
@@ -192,32 +205,37 @@ npm run preview
 **Agents MUST start these processes in the background at the beginning of any development session:**
 
 ```bash
-# Start ALL of these in parallel at the start:
-npm run dev         # Background process for live development server
-npm run tsc:watch   # Background process for continuous type checking
-npm run test:watch  # Background process for continuous test execution
+# Start ALL FOUR of these in parallel at the start:
+npm run dev         # Background - Live development server (Vite)
+npm run dev:css     # Background - Tailwind CSS compilation & watch
+npm run tsc:watch   # Background - Continuous type checking
+npm run test:watch  # Background - Continuous test execution
 ```
 
 These processes should:
-- ✅ Run simultaneously in the background (all 3 at once)
+
+- ✅ Run simultaneously in the background (all 4 at once)
 - ✅ Stay active throughout the entire work session
 - ✅ Be monitored for errors/warnings during development
 - ✅ Provide instant feedback as you make changes
 
 **Why This Matters:**
+
 - `npm run dev` provides live browser preview and hot module reloading
+- `npm run dev:css` generates CSS from Tailwind v4 source (`src/styles.css` → `dist/styles.css`)
 - `npm run tsc:watch` catches TypeScript errors immediately as you type
 - `npm run test:watch` runs tests automatically when code changes, catching regressions instantly
-- Running all three together gives you instant feedback on runtime, type, and logic errors
+- Running all four together gives you instant feedback on runtime, styles, types, and logic errors
 - This prevents wasting time on changes that won't compile, work, or pass tests
 
 #### Development Phases
 
 1. **At Start of Session (REQUIRED):**
    - ✅ Start `npm run dev` in background
+   - ✅ Start `npm run dev:css` in background
    - ✅ Start `npm run tsc:watch` in background
    - ✅ Start `npm run test:watch` in background
-   - ✅ Verify all three are running without errors
+   - ✅ Verify all four are running without errors
    - Review relevant modules in `src/`
 
 2. **While Developing:**
@@ -277,6 +295,7 @@ The following compiler options are **ENABLED** and **REQUIRED**:
 #### ✅ Required Practices
 
 1. **Explicit Types**: Every function parameter and return type must be typed
+
    ```typescript
    // ✅ Good
    function parseTimestamp(input: string): number { ... }
@@ -286,6 +305,7 @@ The following compiler options are **ENABLED** and **REQUIRED**:
    ```
 
 2. **Null Safety**: Always check for null/undefined
+
    ```typescript
    // ✅ Good
    const element = document.getElementById('foo');
@@ -299,6 +319,7 @@ The following compiler options are **ENABLED** and **REQUIRED**:
    ```
 
 3. **Array Access Safety**: Check array bounds
+
    ```typescript
    // ✅ Good
    const first = array[0];
@@ -312,6 +333,7 @@ The following compiler options are **ENABLED** and **REQUIRED**:
    ```
 
 4. **No Unused Variables**: Remove or prefix with underscore
+
    ```typescript
    // ✅ Good
    function process(data: string): void {
@@ -330,6 +352,7 @@ The following compiler options are **ENABLED** and **REQUIRED**:
    ```
 
 5. **Exhaustive Returns**: All code paths must return
+
    ```typescript
    // ✅ Good
    function getStatus(code: number): string {
@@ -376,6 +399,7 @@ const data = someValue as any;
 ### File Organization
 
 1. **Imports First**: Group and order imports
+
    ```typescript
    // 1. Type imports
    import type { Marker, YouTubeChapter } from '@/types';
@@ -401,6 +425,7 @@ const data = someValue as any;
 ### Comments
 
 1. **JSDoc for All Public Functions**:
+
    ```typescript
    /**
     * Converts Adobe Premiere timecode to YouTube format
@@ -412,12 +437,14 @@ const data = someValue as any;
    ```
 
 2. **Inline Comments for Complex Logic**:
+
    ```typescript
    // Extract HH:MM:SS portion using regex (removes frame info)
    const timeMatch = timecode.match(/\d{2}:\d{2}:\d{2}/);
    ```
 
 3. **No Obvious Comments**:
+
    ```typescript
    // ❌ Bad
    // Increment counter
@@ -430,6 +457,7 @@ const data = someValue as any;
 ### Prettier Configuration
 
 Code formatting is enforced by Prettier:
+
 - Single quotes
 - 2-space indentation
 - Semicolons required
@@ -438,6 +466,67 @@ Code formatting is enforced by Prettier:
 - Tailwind class sorting (via plugin)
 
 **Always run `npm run format` before committing.**
+
+### Styling Standards
+
+This project uses **Tailwind CSS v4** exclusively for all styling.
+
+#### ✅ Required Practices
+
+1. **Use Tailwind Utility Classes**: All styling must use Tailwind utility classes in HTML
+
+   ```html
+   <!-- ✅ Good -->
+   <div class="rounded-lg border-2 border-gray-300 bg-white p-8">
+     <!-- ❌ Bad - No inline styles -->
+     <div style="padding: 2rem; background: white;"></div>
+   </div>
+   ```
+
+2. **Custom Styles in `src/styles.css`**: Use `@layer` directives for custom utilities
+
+   ```css
+   /* ✅ Good - in src/styles.css */
+   @layer utilities {
+     .custom-utility {
+       /* styles */
+     }
+   }
+
+   /* ❌ Bad - separate CSS files */
+   /* custom.css */
+   ```
+
+3. **Theme Variables in `@theme`**: Define custom colors/values in `@theme` block
+
+   ```css
+   /* ✅ Good - in src/styles.css */
+   @theme {
+     --color-custom: #abc123;
+   }
+   ```
+
+4. **Run Tailwind CLI**: Always run `npm run dev:css` in background during development
+   - Watches `src/styles.css` for changes
+   - Generates `dist/styles.css` automatically
+   - Required for styles to appear in browser
+
+#### ❌ Forbidden Practices
+
+- **Never write inline styles** (use Tailwind classes instead)
+- **Never create separate CSS files** (use `src/styles.css` only)
+- **Never use old Tailwind v3 syntax** (no `@tailwind` directives)
+- **Never add CSS preprocessors** (Sass, Less, etc.)
+- **Never skip running `npm run dev:css`** (styles won't update)
+
+#### Tailwind v4 Specific
+
+This project uses Tailwind CSS v4 with the CLI approach:
+
+- **Source**: `src/styles.css` (with `@import "tailwindcss"`)
+- **Output**: `dist/styles.css` (generated by CLI)
+- **No config files**: Theme is in CSS using `@theme`
+- **No PostCSS**: Tailwind CLI handles everything
 
 ---
 
@@ -468,6 +557,7 @@ This project uses **Vitest** for unit testing. All core business logic must have
 **Test Structure:**
 
 Tests are located in `src/core/__tests__/` with the pattern `*.test.ts`:
+
 ```
 src/core/
 ├── parser.ts
@@ -536,11 +626,13 @@ npm run test:coverage
 - Overall project: Aim for 70%+ coverage
 
 **🚨 CRITICAL: You MUST write tests when:**
+
 - Adding any new function to `src/core/` or `src/utils/`
 - Fixing a bug (write test first to reproduce, then fix)
 - Refactoring core logic (ensure tests still pass)
 
 **Enforcement:**
+
 - All tests must pass before committing
 - PRs without tests for new features will be rejected
 - Bug fixes without regression tests will be rejected
@@ -603,16 +695,19 @@ npm run build
 ### Adding a New Feature
 
 1. **Start background processes (REQUIRED FIRST STEP)**:
+
    ```bash
-   npm run dev         # Background - provides live preview
-   npm run tsc:watch   # Background - provides instant type checking
-   npm run test:watch  # Background - runs tests automatically
+   npm run dev         # Background - Live preview
+   npm run dev:css     # Background - Tailwind CSS watch
+   npm run tsc:watch   # Background - Type checking
+   npm run test:watch  # Background - Test runner
    ```
 
 2. **Identify the affected modules**:
    - Core logic? → `src/core/`
    - File handling? → `src/utils/`
-   - UI changes? → `src/main.ts` and `index.html`
+   - UI changes? → `src/main.ts` and `src/index.html`
+   - Styling? → `src/styles.css` (Tailwind only)
 
 3. **Update types if needed** (`src/types/index.ts`)
 
@@ -644,10 +739,12 @@ npm run build
 ### Fixing a Bug
 
 1. **Start background processes (REQUIRED FIRST STEP)**:
+
    ```bash
-   npm run dev         # Background - live browser testing
-   npm run tsc:watch   # Background - catch type issues
-   npm run test:watch  # Background - run tests automatically
+   npm run dev         # Background - Live browser testing
+   npm run dev:css     # Background - Tailwind CSS watch
+   npm run tsc:watch   # Background - Catch type issues
+   npm run test:watch  # Background - Test runner
    ```
 
 2. **Reproduce the bug** in browser at http://localhost:3000
@@ -681,10 +778,12 @@ npm run build
 ### Refactoring Code
 
 1. **Start background processes (REQUIRED FIRST STEP)**:
+
    ```bash
-   npm run dev         # Background - verify behavior unchanged
-   npm run tsc:watch   # Background - instant type feedback
-   npm run test:watch  # Background - ensure no regressions
+   npm run dev         # Background - Verify behavior unchanged
+   npm run dev:css     # Background - Tailwind CSS watch
+   npm run tsc:watch   # Background - Type feedback
+   npm run test:watch  # Background - No regressions
    ```
 
 2. **Ensure all tests pass** before starting
@@ -717,10 +816,12 @@ npm run build
 2. **Run `npm install`**
 
 3. **Start background processes to test**:
+
    ```bash
-   npm run dev         # Background - verify app still works
-   npm run tsc:watch   # Background - check for type errors
-   npm run test:watch  # Background - ensure tests still pass
+   npm run dev         # Background - Verify app works
+   npm run dev:css     # Background - Tailwind CSS watch
+   npm run tsc:watch   # Background - Type errors
+   npm run test:watch  # Background - Test runner
    ```
 
 4. **Test the app** in browser at http://localhost:3000
@@ -743,7 +844,7 @@ npm run build
 
 ### DO
 
-✅ **ALWAYS start all 3 background processes first** (`npm run dev` + `npm run tsc:watch` + `npm run test:watch`)
+✅ **ALWAYS start all 4 background processes first** (`npm run dev` + `npm run dev:css` + `npm run tsc:watch` + `npm run test:watch`)
 ✅ **Keep background processes running** throughout the entire session
 ✅ **Monitor background output** for errors and warnings
 ✅ **Write tests for all core logic changes** (new features, bug fixes, refactoring)
@@ -782,6 +883,7 @@ npm run build
 ## Questions?
 
 If you're unsure about:
+
 - **Architecture**: Review this document and check `src/` structure
 - **TypeScript errors**: Run `npm run tsc:watch` for detailed messages
 - **Code style**: Run `npm run format` and check Prettier output

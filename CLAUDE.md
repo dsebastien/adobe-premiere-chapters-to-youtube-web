@@ -65,6 +65,7 @@ npm run build      # Ensure production build works
 ## Project Type
 
 This is a **web application** (not a Node.js CLI tool). It runs entirely in the browser using:
+
 - TypeScript for type-safe development
 - Vite as the build tool
 - Tailwind CSS for styling
@@ -75,6 +76,7 @@ This is a **web application** (not a Node.js CLI tool). It runs entirely in the 
 👉 **Read [AGENTS.md](./AGENTS.md) now** for complete guidelines, architecture details, and development rules.
 
 Without reading AGENTS.md, you will likely:
+
 - **Forget to start all 3 background processes** (dev server + tsc:watch + test:watch)
 - **Forget to write tests** for new features and bug fixes
 - Work without instant feedback and waste time on errors
