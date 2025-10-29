@@ -1,0 +1,795 @@
+# Agent Guidelines for Adobe Premiere to YouTube Chapters
+
+This document provides comprehensive guidelines for AI agents working on this project. Please read carefully before making any modifications.
+
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Architecture](#architecture)
+- [Development Workflow](#development-workflow)
+- [TypeScript Requirements](#typescript-requirements)
+- [Code Standards](#code-standards)
+- [Testing & Validation](#testing--validation)
+- [Common Tasks](#common-tasks)
+
+---
+
+## Project Overview
+
+This is a **web application** that converts Adobe Premiere Pro chapter markers to YouTube's chapter format. The application runs entirely in the browser with zero server-side processing.
+
+### Key Principles
+
+1. **Privacy First**: All file processing happens client-side. No data is transmitted to servers.
+2. **Zero Runtime Dependencies**: Use only native Web APIs (FileReader, Clipboard, Blob).
+3. **Type Safety**: Strict TypeScript with comprehensive error checking.
+4. **Modern Stack**: Vite + TypeScript + Tailwind CSS.
+5. **Performance**: Keep bundle size minimal (currently ~8KB gzipped).
+
+---
+
+## Architecture
+
+### Directory Structure
+
+```
+/
+├── src/
+│   ├── core/              # Core business logic (pure functions)
+│   │   ├── parser.ts      # Parse Premiere marker files
+│   │   ├── converter.ts   # Convert to YouTube format
+│   │   └── validator.ts   # Validate YouTube requirements
+│   ├── utils/             # Utility functions
+│   │   ├── fileReader.ts  # UTF-16LE file reading
+│   │   └── clipboard.ts   # Clipboard operations
+│   ├── types/             # TypeScript type definitions
+│   │   └── index.ts       # All interfaces and types
+│   └── main.ts            # Application entry point (DOM manipulation)
+├── public/                # Static assets
+├── index.html             # Main HTML file
+├── styles.css             # Tailwind CSS entry
+└── [config files]         # Vite, TypeScript, Tailwind, etc.
+```
+
+### Module Responsibilities
+
+#### Core Module (`src/core/`)
+
+**Purpose**: Pure business logic with no side effects or DOM manipulation.
+
+- **parser.ts**: Parses tab-separated Adobe Premiere marker files
+  - Input: UTF-16LE encoded string
+  - Output: Array of `Marker` objects
+  - Must handle malformed data gracefully
+
+- **converter.ts**: Converts timecode formats and formats output
+  - `convertToYouTubeFormat()`: Transforms `Marker[]` to `YouTubeChapter[]`
+  - `formatChaptersAsText()`: Formats chapters as YouTube-ready string
+  - Strips frame information from timecodes (HH:MM:SS:FF → HH:MM:SS)
+
+- **validator.ts**: Validates chapters against YouTube requirements
+  - First chapter at 00:00:00
+  - Minimum 3 chapters
+  - 10+ second gaps between chapters
+  - Ascending order
+  - Returns detailed `ValidationResult` with errors and warnings
+
+**Rules for Core Module:**
+- ✅ Pure functions only (no side effects)
+- ✅ All functions must have JSDoc comments
+- ✅ Must handle edge cases (empty input, malformed data)
+- ✅ No DOM manipulation
+- ✅ No external API calls
+- ❌ Never use `console.log` (return errors instead)
+
+#### Utils Module (`src/utils/`)
+
+**Purpose**: Browser API wrappers and helper functions.
+
+- **fileReader.ts**: File reading utilities
+  - `readFileAsUTF16LE()`: Reads File as UTF-16LE string (returns Promise)
+  - `isValidTextFile()`: Validates file extension
+  - Must handle encoding errors gracefully
+
+- **clipboard.ts**: Clipboard operations
+  - `copyToClipboard()`: Writes to clipboard (requires HTTPS/localhost)
+  - `isClipboardAvailable()`: Checks API availability
+  - Must handle permission errors
+
+**Rules for Utils Module:**
+- ✅ Wrap native APIs in error-safe functions
+- ✅ Return Promises for async operations
+- ✅ Provide clear error messages
+- ✅ Check feature availability before use
+
+#### Types Module (`src/types/`)
+
+**Purpose**: Central type definitions for the entire application.
+
+**All types must be:**
+- Exported as interfaces (not types)
+- Documented with JSDoc comments
+- As specific as possible (avoid `any` or `unknown`)
+
+**Key Types:**
+- `Marker`: Adobe Premiere marker data
+- `YouTubeChapter`: YouTube-formatted chapter
+- `ValidationResult`: Validation outcome with errors/warnings
+- `AppState`: Application state object
+
+#### Main Module (`src/main.ts`)
+
+**Purpose**: Application entry point with DOM manipulation and event handling.
+
+**Responsibilities:**
+- Initialize application state
+- Wire up event listeners
+- Handle user interactions
+- Update DOM based on state changes
+- Orchestrate core/utils modules
+
+**Rules for Main Module:**
+- ✅ All DOM queries happen once at initialization
+- ✅ Store references in `elements` object
+- ✅ Use type assertions for DOM elements (`as HTMLInputElement`)
+- ✅ Handle all user events (file upload, drag-drop, copy, download)
+- ✅ Show loading/error states
+- ❌ No business logic (delegate to core modules)
+
+---
+
+## Development Workflow
+
+### Required Scripts
+
+All agents must use these npm scripts (never run commands directly):
+
+```bash
+# Installation (first time setup)
+npm install
+
+# Development (hot reload)
+npm run dev
+
+# Testing (run once)
+npm run test
+
+# Testing with watch mode (continuous)
+npm run test:watch
+
+# Testing with UI
+npm run test:ui
+
+# Testing with coverage report
+npm run test:coverage
+
+# Type checking (run before commits)
+npm run type-check
+
+# Type checking with watch mode
+npm run tsc:watch
+
+# Code formatting (auto-fix)
+npm run format
+
+# Code formatting check (CI)
+npm run format:check
+
+# Linting (type check + format check)
+npm run lint
+
+# Production build
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+### Workflow Rules
+
+#### 🚨 CRITICAL: Always Run Background Processes
+
+**Agents MUST start these processes in the background at the beginning of any development session:**
+
+```bash
+# Start ALL of these in parallel at the start:
+npm run dev         # Background process for live development server
+npm run tsc:watch   # Background process for continuous type checking
+npm run test:watch  # Background process for continuous test execution
+```
+
+These processes should:
+- ✅ Run simultaneously in the background (all 3 at once)
+- ✅ Stay active throughout the entire work session
+- ✅ Be monitored for errors/warnings during development
+- ✅ Provide instant feedback as you make changes
+
+**Why This Matters:**
+- `npm run dev` provides live browser preview and hot module reloading
+- `npm run tsc:watch` catches TypeScript errors immediately as you type
+- `npm run test:watch` runs tests automatically when code changes, catching regressions instantly
+- Running all three together gives you instant feedback on runtime, type, and logic errors
+- This prevents wasting time on changes that won't compile, work, or pass tests
+
+#### Development Phases
+
+1. **At Start of Session (REQUIRED):**
+   - ✅ Start `npm run dev` in background
+   - ✅ Start `npm run tsc:watch` in background
+   - ✅ Start `npm run test:watch` in background
+   - ✅ Verify all three are running without errors
+   - Review relevant modules in `src/`
+
+2. **While Developing:**
+   - Monitor output from all background processes for errors
+   - Check test:watch output for failing tests
+   - Test changes in the browser at http://localhost:3000
+   - Check tsc:watch output for type errors after each significant change
+   - Make iterative improvements based on instant feedback
+
+3. **After Making Changes:**
+   - Verify tsc:watch shows "Found 0 errors"
+   - Verify test:watch shows all tests passing
+   - Test functionality in the browser (dev server)
+   - Run `npm run format` to auto-format code
+   - Run `npm run build` to ensure production build works
+
+4. **Before Committing:**
+   - Stop background processes (or verify they show no errors)
+   - Run `npm run test` to ensure all tests pass
+   - Run `npm run lint` to verify all checks pass
+   - Run `npm run build` to confirm production build succeeds
+
+---
+
+## TypeScript Requirements
+
+This project uses **ultra-strict TypeScript configuration**. All code must comply with these rules:
+
+### Strict Mode (Non-Negotiable)
+
+The following compiler options are **ENABLED** and **REQUIRED**:
+
+```json
+{
+  "strict": true,
+  "noImplicitAny": true,
+  "strictNullChecks": true,
+  "strictFunctionTypes": true,
+  "strictBindCallApply": true,
+  "strictPropertyInitialization": true,
+  "noImplicitThis": true,
+  "alwaysStrict": true,
+  "noUnusedLocals": true,
+  "noUnusedParameters": true,
+  "noImplicitReturns": true,
+  "noFallthroughCasesInSwitch": true,
+  "noUncheckedIndexedAccess": true,
+  "noImplicitOverride": true,
+  "noPropertyAccessFromIndexSignature": true,
+  "allowUnusedLabels": false,
+  "allowUnreachableCode": false
+}
+```
+
+### What This Means
+
+#### ✅ Required Practices
+
+1. **Explicit Types**: Every function parameter and return type must be typed
+   ```typescript
+   // ✅ Good
+   function parseTimestamp(input: string): number { ... }
+
+   // ❌ Bad
+   function parseTimestamp(input) { ... }
+   ```
+
+2. **Null Safety**: Always check for null/undefined
+   ```typescript
+   // ✅ Good
+   const element = document.getElementById('foo');
+   if (element) {
+     element.textContent = 'bar';
+   }
+
+   // ❌ Bad
+   const element = document.getElementById('foo');
+   element.textContent = 'bar'; // Error: element might be null
+   ```
+
+3. **Array Access Safety**: Check array bounds
+   ```typescript
+   // ✅ Good
+   const first = array[0];
+   if (first) {
+     console.log(first.name);
+   }
+
+   // ❌ Bad
+   const first = array[0];
+   console.log(first.name); // Error: first might be undefined
+   ```
+
+4. **No Unused Variables**: Remove or prefix with underscore
+   ```typescript
+   // ✅ Good
+   function process(data: string): void {
+     console.log(data);
+   }
+
+   // ✅ Good (intentionally unused)
+   function process(_data: string): void {
+     console.log('processing...');
+   }
+
+   // ❌ Bad
+   function process(data: string): void {
+     console.log('processing...'); // Error: data is unused
+   }
+   ```
+
+5. **Exhaustive Returns**: All code paths must return
+   ```typescript
+   // ✅ Good
+   function getStatus(code: number): string {
+     if (code === 200) {
+       return 'OK';
+     } else {
+       return 'Error';
+     }
+   }
+
+   // ❌ Bad
+   function getStatus(code: number): string {
+     if (code === 200) {
+       return 'OK';
+     }
+     // Error: not all code paths return a value
+   }
+   ```
+
+#### ❌ Forbidden Practices
+
+- **Never use `any`** (use `unknown` if you must, then narrow the type)
+- **Never use `@ts-ignore`** or `@ts-expect-error`
+- **Never disable strict checks** in code or config
+- **Never use non-null assertions** (`!`) unless absolutely necessary
+- **Never mutate function parameters** (use pure functions)
+
+### Type Assertions
+
+Type assertions are allowed ONLY for DOM elements where you know the type:
+
+```typescript
+// ✅ Allowed
+const input = document.getElementById('file-input') as HTMLInputElement;
+
+// ❌ Avoid
+const data = someValue as any;
+```
+
+---
+
+## Code Standards
+
+### File Organization
+
+1. **Imports First**: Group and order imports
+   ```typescript
+   // 1. Type imports
+   import type { Marker, YouTubeChapter } from '@/types';
+
+   // 2. Module imports
+   import { parseMarkerFile } from '@/core/parser';
+   import { readFileAsUTF16LE } from '@/utils/fileReader';
+   ```
+
+2. **Constants**: Define at top of file
+3. **Types**: Define before functions
+4. **Functions**: Order by importance (public first)
+5. **Exports**: Export at declaration, not at end
+
+### Naming Conventions
+
+- **Files**: camelCase (e.g., `fileReader.ts`)
+- **Functions**: camelCase (e.g., `parseMarkerFile()`)
+- **Types/Interfaces**: PascalCase (e.g., `YouTubeChapter`)
+- **Constants**: UPPER_SNAKE_CASE (e.g., `MAX_FILE_SIZE`)
+- **Private helpers**: Prefix with underscore (e.g., `_parseTimecode()`)
+
+### Comments
+
+1. **JSDoc for All Public Functions**:
+   ```typescript
+   /**
+    * Converts Adobe Premiere timecode to YouTube format
+    *
+    * @param timecode - Timecode in HH:MM:SS:FF format
+    * @returns Timecode in HH:MM:SS format
+    */
+   export function convertTimecode(timecode: string): string { ... }
+   ```
+
+2. **Inline Comments for Complex Logic**:
+   ```typescript
+   // Extract HH:MM:SS portion using regex (removes frame info)
+   const timeMatch = timecode.match(/\d{2}:\d{2}:\d{2}/);
+   ```
+
+3. **No Obvious Comments**:
+   ```typescript
+   // ❌ Bad
+   // Increment counter
+   counter++;
+
+   // ✅ Good (no comment needed)
+   counter++;
+   ```
+
+### Prettier Configuration
+
+Code formatting is enforced by Prettier:
+- Single quotes
+- 2-space indentation
+- Semicolons required
+- 80-character line width
+- Trailing commas (ES5)
+- Tailwind class sorting (via plugin)
+
+**Always run `npm run format` before committing.**
+
+---
+
+## Testing & Validation
+
+### Automated Testing
+
+This project uses **Vitest** for unit testing. All core business logic must have comprehensive test coverage.
+
+#### Test Requirements
+
+**When You MUST Write Tests:**
+
+1. ✅ **New Feature**: Any new function or module requires tests
+2. ✅ **Bug Fix**: Add a test that reproduces the bug, then fix it
+3. ✅ **Refactoring**: Ensure existing tests pass; add new ones if coverage gaps exist
+4. ✅ **Core Logic Changes**: All changes to `src/core/` require corresponding test updates
+
+**What to Test:**
+
+- ✅ **Core modules** (`src/core/`): Full test coverage required
+  - `parser.ts`: All parsing scenarios, edge cases, malformed data
+  - `converter.ts`: All conversion logic, timestamp formatting
+  - `validator.ts`: All validation rules, error and warning cases
+- ✅ **Utils modules** (`src/utils/`): Test all public functions
+- ❌ **UI/DOM code** (`src/main.ts`, `index.html`): Manual testing only
+
+**Test Structure:**
+
+Tests are located in `src/core/__tests__/` with the pattern `*.test.ts`:
+```
+src/core/
+├── parser.ts
+├── converter.ts
+├── validator.ts
+└── __tests__/
+    ├── parser.test.ts
+    ├── converter.test.ts
+    └── validator.test.ts
+```
+
+**Writing Tests:**
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { functionToTest } from '../module';
+
+describe('functionToTest', () => {
+  it('should handle normal case', () => {
+    const result = functionToTest('input');
+    expect(result).toBe('expected output');
+  });
+
+  it('should handle edge case', () => {
+    const result = functionToTest('');
+    expect(result).toBe('');
+  });
+
+  it('should handle error case', () => {
+    expect(() => functionToTest(null)).toThrow();
+  });
+});
+```
+
+**Test Best Practices:**
+
+- ✅ Test one behavior per test case
+- ✅ Use descriptive test names ("should do X when Y")
+- ✅ Cover happy path, edge cases, and error cases
+- ✅ Keep tests simple and readable
+- ✅ Don't test implementation details, test behavior
+- ✅ Mock external dependencies (browser APIs, etc.)
+- ❌ Don't test TypeScript types (that's what tsc does)
+- ❌ Don't make tests depend on each other
+
+**Running Tests:**
+
+```bash
+# Run all tests once
+npm run test
+
+# Run tests in watch mode (RECOMMENDED for development)
+npm run test:watch
+
+# Run tests with UI
+npm run test:ui
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+**Coverage Requirements:**
+
+- Core modules (`src/core/`): Aim for 90%+ coverage
+- Utils modules (`src/utils/`): Aim for 80%+ coverage
+- Overall project: Aim for 70%+ coverage
+
+**🚨 CRITICAL: You MUST write tests when:**
+- Adding any new function to `src/core/` or `src/utils/`
+- Fixing a bug (write test first to reproduce, then fix)
+- Refactoring core logic (ensure tests still pass)
+
+**Enforcement:**
+- All tests must pass before committing
+- PRs without tests for new features will be rejected
+- Bug fixes without regression tests will be rejected
+
+### Manual Testing Checklist
+
+Before considering any change complete, test:
+
+1. **File Upload**:
+   - Click to browse and select file
+   - Drag and drop file
+   - Invalid file type rejection
+
+2. **Conversion**:
+   - Valid Premiere marker file
+   - File with < 3 chapters (should show error)
+   - File without 00:00:00 start (should show error)
+   - File with < 10 second gaps (should show warning)
+
+3. **Output**:
+   - Copy to clipboard
+   - Download as file
+   - Reset button
+
+4. **Error Handling**:
+   - Empty file
+   - Malformed marker data
+   - Wrong encoding
+
+5. **Browser Compatibility**:
+   - Chrome/Edge
+   - Firefox
+   - Safari (if possible)
+
+### Validation Commands
+
+```bash
+# Run all tests (must pass)
+npm run test
+
+# Type checking (must pass)
+npm run type-check
+
+# Formatting check (must pass)
+npm run format:check
+
+# Full lint (must pass)
+npm run lint
+
+# Production build (must succeed)
+npm run build
+```
+
+**All commands must exit with code 0 (no errors).**
+
+---
+
+## Common Tasks
+
+### Adding a New Feature
+
+1. **Start background processes (REQUIRED FIRST STEP)**:
+   ```bash
+   npm run dev         # Background - provides live preview
+   npm run tsc:watch   # Background - provides instant type checking
+   npm run test:watch  # Background - runs tests automatically
+   ```
+
+2. **Identify the affected modules**:
+   - Core logic? → `src/core/`
+   - File handling? → `src/utils/`
+   - UI changes? → `src/main.ts` and `index.html`
+
+3. **Update types if needed** (`src/types/index.ts`)
+
+4. **Write tests FIRST (TDD approach recommended)**:
+   - Create test file in appropriate `__tests__/` directory
+   - Write failing tests for new functionality
+   - Watch test:watch output to see tests fail
+
+5. **Implement with strict TypeScript**:
+   - Write code and watch tsc:watch output for immediate type errors
+   - Watch test:watch to see tests pass as you implement
+   - Test in browser at http://localhost:3000 via dev server
+   - Iterate based on instant feedback from all watchers
+
+6. **Add JSDoc comments**
+
+7. **Verify all watchers show success**:
+   - tsc:watch shows "Found 0 errors"
+   - test:watch shows all tests passing
+   - dev server runs without errors
+
+8. **Run final validation**:
+   ```bash
+   npm run test
+   npm run format
+   npm run build
+   ```
+
+### Fixing a Bug
+
+1. **Start background processes (REQUIRED FIRST STEP)**:
+   ```bash
+   npm run dev         # Background - live browser testing
+   npm run tsc:watch   # Background - catch type issues
+   npm run test:watch  # Background - run tests automatically
+   ```
+
+2. **Reproduce the bug** in browser at http://localhost:3000
+
+3. **Identify the source** (core logic vs. UI vs. utils)
+
+4. **Write a test that reproduces the bug**:
+   - Add test case to appropriate test file
+   - Confirm test fails (reproduces the bug)
+   - This prevents regression in the future
+
+5. **Write a fix** that handles edge cases:
+   - Monitor tsc:watch for type errors
+   - Watch test:watch to see bug-reproducing test pass
+   - Test in real-time via dev server
+   - Iterate quickly with hot reload
+
+6. **Verify fix works**:
+   - All existing tests still pass
+   - New test passes
+   - tsc:watch shows no errors
+   - Bug is fixed in browser
+
+7. **Run final validation**:
+   ```bash
+   npm run test
+   npm run format
+   npm run build
+   ```
+
+### Refactoring Code
+
+1. **Start background processes (REQUIRED FIRST STEP)**:
+   ```bash
+   npm run dev         # Background - verify behavior unchanged
+   npm run tsc:watch   # Background - instant type feedback
+   npm run test:watch  # Background - ensure no regressions
+   ```
+
+2. **Ensure all tests pass** before starting
+
+3. **Verify current behavior** (manual testing in browser)
+
+4. **Make incremental changes**:
+   - Watch tsc:watch output after each change
+   - Watch test:watch to ensure tests still pass
+   - Test in browser after each change
+   - Rollback immediately if tests fail or issues appear
+
+5. **Verify behavior unchanged**:
+   - tsc:watch shows no errors
+   - test:watch shows all tests passing
+   - Manual testing shows same behavior
+
+6. **Run final validation**:
+   ```bash
+   npm run test
+   npm run format
+   npm run lint
+   npm run build
+   ```
+
+### Updating Dependencies
+
+1. **Update package.json**
+
+2. **Run `npm install`**
+
+3. **Start background processes to test**:
+   ```bash
+   npm run dev         # Background - verify app still works
+   npm run tsc:watch   # Background - check for type errors
+   npm run test:watch  # Background - ensure tests still pass
+   ```
+
+4. **Test the app** in browser at http://localhost:3000
+
+5. **Verify all watchers show success**:
+   - tsc:watch shows no new errors
+   - test:watch shows all tests passing
+   - dev server runs without errors
+
+6. **Run final validation**:
+   ```bash
+   npm run test
+   npm run build
+   npm run lint
+   ```
+
+---
+
+## Important Reminders
+
+### DO
+
+✅ **ALWAYS start all 3 background processes first** (`npm run dev` + `npm run tsc:watch` + `npm run test:watch`)
+✅ **Keep background processes running** throughout the entire session
+✅ **Monitor background output** for errors and warnings
+✅ **Write tests for all core logic changes** (new features, bug fixes, refactoring)
+✅ **Write tests BEFORE implementing** (TDD approach recommended)
+✅ Read this document before making changes
+✅ Use npm scripts (never run `tsc` or `prettier` directly)
+✅ Write strict TypeScript with explicit types
+✅ Add JSDoc comments for public functions
+✅ Handle errors gracefully with user-friendly messages
+✅ Test in the browser after changes
+✅ Keep bundle size small (avoid adding dependencies)
+✅ Format code with `npm run format`
+✅ Validate with `npm run lint` before finishing
+✅ Ensure all tests pass before committing
+
+### DON'T
+
+❌ **Start coding without running all 3 background processes first**
+❌ **Work without live type checking, dev server, and test runner**
+❌ **Add features without writing tests**
+❌ **Fix bugs without adding regression tests**
+❌ **Commit code with failing tests**
+❌ Disable TypeScript strict checks
+❌ Use `any` type
+❌ Add runtime dependencies (keep it vanilla)
+❌ Make changes without testing
+❌ Commit without running validation
+❌ Modify configuration files without discussion
+❌ Use `console.log` in production code
+❌ Skip JSDoc comments on public functions
+❌ Ignore compiler warnings
+❌ Break existing functionality
+
+---
+
+## Questions?
+
+If you're unsure about:
+- **Architecture**: Review this document and check `src/` structure
+- **TypeScript errors**: Run `npm run tsc:watch` for detailed messages
+- **Code style**: Run `npm run format` and check Prettier output
+- **Build issues**: Check Vite output in `npm run build`
+
+When in doubt, prefer simplicity and type safety over clever solutions.
+
+---
+
+**Last Updated**: 2025-10-29
+**Project Version**: 2.0.0
